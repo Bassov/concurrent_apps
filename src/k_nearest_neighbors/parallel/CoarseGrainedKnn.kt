@@ -7,11 +7,11 @@ import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 
-class CoarseGrainedKnn(val dataSet: List<Sample>, val k: Int, val parallelSort: Boolean) {
+class CoarseGrainedKnn(dataSet: List<Sample>, k: Int) : AbstractKnn(dataSet, k) {
     val cores = Runtime.getRuntime().availableProcessors()
     val pool = Executors.newFixedThreadPool(cores)
 
-    fun classify(example: Sample): String? {
+    override fun classify(example: Sample): String? {
         val distances = arrayOfNulls<Distance>(dataSet.size)
         val latch = CountDownLatch(cores)
 
@@ -33,7 +33,7 @@ class CoarseGrainedKnn(val dataSet: List<Sample>, val k: Int, val parallelSort: 
         }
         latch.await()
 
-        if (parallelSort) Arrays.parallelSort(distances) else distances.sort()
+        Arrays.parallelSort(distances)
         val results = HashMap<String, Int>()
         (0..k)
                 .map { dataSet[distances[it]!!.index].tag }
@@ -43,7 +43,7 @@ class CoarseGrainedKnn(val dataSet: List<Sample>, val k: Int, val parallelSort: 
                 ?.key
     }
 
-    fun destroy() {
+    override fun destroy() {
         pool.shutdown()
     }
 }
