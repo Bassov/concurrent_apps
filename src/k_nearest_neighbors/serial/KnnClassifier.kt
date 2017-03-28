@@ -2,11 +2,13 @@ package k_nearest_neighbors.serial
 
 import k_nearest_neighbors.data.Distance
 import k_nearest_neighbors.data.Sample
+import k_nearest_neighbors.distances.euclideanDist
+import k_nearest_neighbors.parallel.AbstractKnn
 import java.util.*
 
-class KnnClassifier(var dataSet: List<Sample>, val k: Int) {
-    fun classify(example: Sample): String? {
-        val distances = Array(dataSet.size, { i -> Distance(i, distance(dataSet[i], example)) })
+class KnnClassifier(dataSet: List<Sample>, k: Int) : AbstractKnn(dataSet, k) {
+    override fun classify(example: Sample): String? {
+        val distances = Array(dataSet.size, { i -> Distance(i, euclideanDist(dataSet[i], example)) })
         distances.sort()
 
         val results = HashMap<String, Int>()
@@ -17,17 +19,5 @@ class KnnClassifier(var dataSet: List<Sample>, val k: Int) {
         return results
                 .maxBy { entry -> entry.value }
                 ?.key
-    }
-
-    private fun distance(example1: Sample, example2: Sample): Double {
-        val data1 = example1.example
-        val data2 = example2.example
-
-        if (data1.size != data2.size) {
-            throw IllegalArgumentException("Vector doesn't have the same length")
-        }
-
-        val ret = data1.indices.sumByDouble { Math.pow(data1[it] - data2[it], 2.0) }
-        return Math.sqrt(ret)
     }
 }
