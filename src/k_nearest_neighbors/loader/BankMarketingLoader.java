@@ -27,7 +27,6 @@ public class BankMarketingLoader {
 	 */
 	public List<BankMarketing> load (String dataPath) {
 		Path file = Paths.get(dataPath).toAbsolutePath();
-		System.out.println(file.toString());
 		List<BankMarketing> dataSet=new ArrayList<>();
 		try (InputStream in = Files.newInputStream(file);
 			 BufferedReader reader =
